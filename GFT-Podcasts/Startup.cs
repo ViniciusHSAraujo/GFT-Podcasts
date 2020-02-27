@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GFT_Podcasts.Database;
+using GFT_Podcasts.Models;
+using GFT_Podcasts.Repositories;
+using GFT_Podcasts.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 
 namespace GFT_Podcasts {
     public class Startup {
@@ -23,11 +27,15 @@ namespace GFT_Podcasts {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<ICategoriaRepository, CategoriaRepository>();
+            services.AddTransient<IPodcastRepository, PodcastRepository>();
+            services.AddTransient<IEpisodioRepository, EpisodioRepository>();
 
         }
 

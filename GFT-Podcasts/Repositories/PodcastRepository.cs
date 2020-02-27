@@ -2,6 +2,7 @@
 using System.Linq;
 using GFT_Podcasts.Database;
 using GFT_Podcasts.Models;
+using GFT_Podcasts.Models.ViewModels.PodcastViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,8 +34,17 @@ namespace GFT_Podcasts.Repositories {
             return _dbContext.Set<Podcast>().FirstOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<Podcast> Listar() {
-            return _dbContext.Set<Podcast>().Include(x => x.Episodios).ToList();
+        public IEnumerable<PodcastListagemViewModel> Listar() {
+            return _dbContext.Set<Podcast>().Include(x => x.Episodios).Include(x => x.Categoria).Select(x => new PodcastListagemViewModel() {
+                Id = x.Id,
+                Autor = x.Autor,
+                Categoria = x.Categoria.Nome,
+                Descricao = x.Descricao,
+                Nome = x.Nome,
+                Imagem = x.Imagem,
+                Link = x.Link,
+                QtdeEpisodios = x.Episodios.Count()
+            }).ToList();
         }
     }
 }

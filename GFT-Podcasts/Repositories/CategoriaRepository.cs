@@ -2,6 +2,7 @@
 using System.Linq;
 using GFT_Podcasts.Database;
 using GFT_Podcasts.Models;
+using GFT_Podcasts.Models.ViewModels.CategoriaViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,8 +34,8 @@ namespace GFT_Podcasts.Repositories {
             return _dbContext.Set<Categoria>().Include(x => x.Podcasts).FirstOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<Categoria> Listar() {
-            return _dbContext.Set<Categoria>().ToList();
+        public IEnumerable<CategoriaListagemViewModel> Listar() {
+            return _dbContext.Set<Categoria>().Select(x => new CategoriaListagemViewModel(){Id = x.Id, Nome = x.Nome}).ToList();
         }
     }
 }
