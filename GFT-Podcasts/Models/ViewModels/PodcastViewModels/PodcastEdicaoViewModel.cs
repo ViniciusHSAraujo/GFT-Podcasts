@@ -8,27 +8,28 @@ namespace GFT_Podcasts.Models.ViewModels.PodcastViewModels {
         [Display(Name = "Id")]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Este campo é de preenchimento obrigatório.")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         [MinLength(3, ErrorMessage = "Nome muito curto.")]
-        [MaxLength(100, ErrorMessage = "Nome muito grande.")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string Nome { get; set; }
         
-        [Required(ErrorMessage = "Este campo é de preenchimento obrigatório.")]
-        [MinLength(5, ErrorMessage = "Nome do autor muito curto.")]
-        [MaxLength(50, ErrorMessage = "Nome do autor muito grande.")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string Autor { get; set; }
         
-        [Required(ErrorMessage = "Este campo é de preenchimento obrigatório.")]
-        [MinLength(10, ErrorMessage = "A descrição precisa ser mais detalhada.")]
-        [MaxLength(100, ErrorMessage = "Descrição muito longa.")]        
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string Descricao { get; set; }
         
-        [Required(ErrorMessage = "Este campo é de preenchimento obrigatório.")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public string Link { get; set; }
         
-        [Required(ErrorMessage = "Este campo é de preenchimento obrigatório.")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public string Imagem { get; set; }
         
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public int CategoriaId { get; set; }
     }
 }

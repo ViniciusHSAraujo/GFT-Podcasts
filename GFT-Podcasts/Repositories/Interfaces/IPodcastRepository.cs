@@ -12,5 +12,7 @@ namespace GFT_Podcasts.Repositories.Interfaces {
 
         void Criar(Podcast obj);
         IEnumerable<PodcastListagemViewModel> Listar();
+
+        bool Existe(int id);
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GFT_Podcasts.Libraries.ExtensionsMethods;
 using GFT_Podcasts.Models;
+using GFT_Podcasts.Models.ViewModels;
 using GFT_Podcasts.Models.ViewModels.CategoriaViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -17,52 +19,61 @@ namespace GFT_Podcasts.Controllers {
 
         [HttpGet]
         [Route("v1/categorias/{id}")]
-        public Categoria Get(int id) {
-            return _categoriaRepository.Buscar(id);
+        public ObjectResult Get(int id) {
+            var categoria = _categoriaRepository.Buscar(id);
+
+            if (categoria == null) {
+                return new ObjectResult(new ResultViewModel(false, "Categoria não encontrada!", null));
+            }
+
+            return new ObjectResult(new ResultViewModel(true, "Categoria encontrada!", categoria));
         }
 
         [HttpGet]
         [Route("v1/categorias")]
-        public IEnumerable<CategoriaListagemViewModel> Get() {
-            return _categoriaRepository.Listar();
+        public ObjectResult Get() {
+            var categorias = _categoriaRepository.Listar();
+            return new ObjectResult(new ResultViewModel(true, "Listagem de Categorias!", categorias));
         }
 
         [HttpPost]
         [Route("v1/categorias/")]
-        public IActionResult Post([FromBody] CategoriaCadastroViewModel categoriaTemp) {
-            if (ModelState.IsValid) {
-                var categoria = new Categoria() {
-                    Id = 0,
-                    Nome = categoriaTemp.Nome
-                };
-                _categoriaRepository.Criar(categoria);
-                return Ok(categoria);
-            }
-
-            return BadRequest(categoriaTemp);
+        public ObjectResult Post([FromBody] CategoriaCadastroViewModel categoriaTemp) {
+            if (!ModelState.IsValid)
+                return new ObjectResult(new ResultViewModel(false, "Erro ao cadastrar categoria.",
+                    ModelState.ListarErros()));
+            var categoria = new Categoria() {
+                Id = 0,
+                Nome = categoriaTemp.Nome
+            };
+            _categoriaRepository.Criar(categoria);
+            return new ObjectResult(new ResultViewModel(true, "Categoria cadastrada com sucesso!", categoria));
         }
 
         [HttpPut]
         [Route("v1/categorias/{id}")]
-        public IActionResult Put(int id, [FromBody] CategoriaEdicaoViewModel categoriaTemp) {
-            if (ModelState.IsValid && id == categoriaTemp.Id) {
-                var categoria = new Categoria() {
-                    Id = categoriaTemp.Id,
-                    Nome = categoriaTemp.Nome
-                };
-                _categoriaRepository.Editar(categoria);
-                return Ok(categoria);
+        public ObjectResult Put(int id, [FromBody] CategoriaEdicaoViewModel categoriaTemp) {
+            if (id != categoriaTemp.Id) {
+                ModelState.AddModelError("Id", "Id da requisição difere do Id da categoria.");
             }
-
-            return BadRequest(categoriaTemp);
+            
+            if (!ModelState.IsValid)
+                return new ObjectResult(new ResultViewModel(false, "Erro ao editar categoria.",
+                    ModelState.ListarErros()));
+            var categoria = new Categoria() {
+                Id = categoriaTemp.Id,
+                Nome = categoriaTemp.Nome
+            };
+            _categoriaRepository.Editar(categoria);
+            return new ObjectResult(new ResultViewModel(true, "Categoria editada com sucesso!", categoria));
         }
 
         [HttpDelete]
         [Route("v1/categorias/{id}")]
-        public IActionResult Delete(int id) {
+        public ObjectResult Delete(int id) {
             var categoria = _categoriaRepository.Buscar(id);
             _categoriaRepository.Remover(categoria);
-            return Ok(categoria);
+            return new ObjectResult(new ResultViewModel(true, "Categoria excluída com sucesso!", categoria));
         }
     }
 }

@@ -18,7 +18,7 @@ namespace GFT_Podcasts.Models {
 
         public int CategoriaId { get; set; }
         [ForeignKey(nameof(CategoriaId))] public Categoria Categoria { get; set; }
-
+        
         public virtual IEnumerable<Episodio> Episodios { get; set; }
     }
 }

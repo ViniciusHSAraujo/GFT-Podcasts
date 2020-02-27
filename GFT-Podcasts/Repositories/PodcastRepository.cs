@@ -31,11 +31,13 @@ namespace GFT_Podcasts.Repositories {
         }
 
         public Podcast Buscar(int id) {
-            return _dbContext.Set<Podcast>().FirstOrDefault(x => x.Id == id);
+            return _dbContext.Set<Podcast>().Include(x => x.Episodios).Include
+                (x => x.Categoria).FirstOrDefault(x => x.Id == id);
         }
 
         public IEnumerable<PodcastListagemViewModel> Listar() {
-            return _dbContext.Set<Podcast>().Include(x => x.Episodios).Include(x => x.Categoria).Select(x => new PodcastListagemViewModel() {
+            return _dbContext.Set<Podcast>().Include(x => x.Episodios).Include
+                (x => x.Categoria).Select(x => new PodcastListagemViewModel() {
                 Id = x.Id,
                 Autor = x.Autor,
                 Categoria = x.Categoria.Nome,
@@ -45,6 +47,10 @@ namespace GFT_Podcasts.Repositories {
                 Link = x.Link,
                 QtdeEpisodios = x.Episodios.Count()
             }).ToList();
+        }
+
+        public bool Existe(int id) {
+            return _dbContext.Set<Podcast>().Any(x => x.Id == id);
         }
     }
 }

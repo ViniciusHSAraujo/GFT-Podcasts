@@ -7,29 +7,29 @@ namespace GFT_Podcasts.Models.ViewModels.EpisodioViewModels {
         [Display(Name = "Id")]
         public int Id { get; set; }
         
-        [Required(ErrorMessage = "{0} é requerido")]
-        [MinLength(3, ErrorMessage = " {0} tem de ser maior que {1}")]
-        [MaxLength(100, ErrorMessage = "{0} precisa ser maior que {1}")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string Titulo { get; set; }
 
-        [Required(ErrorMessage = "{0} é requerido")]
-        [MinLength(3, ErrorMessage = " {0} tem de ser maior que {1}")]
-        [MaxLength(100, ErrorMessage = "{0} precisa ser maior que {1}")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string Descricao { get; set; }
         
-        [Required(ErrorMessage = "{0} é requerido")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public DateTime Lancamento { get; set; }
 
-        [Required(ErrorMessage = "{0} é requerido")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public double Duracao { get; set; }
 
 
-        [Required(ErrorMessage = "{0} é requerido")]
-        [MinLength(3, ErrorMessage = " {0} tem de ser maior que {1}")]
-        [MaxLength(100, ErrorMessage = "{0} precisa ser maior que {1}")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]
+        [MaxLength(100, ErrorMessage = "O campo {0} deve ter no máximo {1} caracteres")]
         public string LinkAudio { get; set; }
 
-        [Required(ErrorMessage = "{0} é requerido")]
+        [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         public int PodcastId { get; set; }
     }
 }
