@@ -16,6 +16,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace GFT_Podcasts {
     public class Startup {
@@ -28,15 +31,23 @@ namespace GFT_Podcasts {
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
             services.AddControllers().AddNewtonsoftJson();
-            
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(
-                    Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<ApplicationDbContext>
+                (options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddTransient<ICategoriaRepository, CategoriaRepository>();
             services.AddTransient<IPodcastRepository, PodcastRepository>();
             services.AddTransient<IEpisodioRepository, EpisodioRepository>();
 
+            services.AddResponseCompression();
+
+            services.AddSwaggerGen
+            (c => {
+                c.SwaggerDoc
+                ("v1", new OpenApiInfo {
+                    Version = "v1", Title = "GFT Podcast", Description = "API de gerenciamento de podcasts.",
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +62,20 @@ namespace GFT_Podcasts {
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseResponseCompression();
+
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI
+            (c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "GFT Podcast");
+            });
+
+            app.UseEndpoints
+            (endpoints => {
+                endpoints.MapControllers();
+            });
         }
     }
 }
