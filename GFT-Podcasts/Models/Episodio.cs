@@ -13,7 +13,7 @@ namespace GFT_Podcasts.Models {
 
         public DateTime Lancamento { get; set; }
 
-        public double Duracao { get; set; }
+        public int Duracao { get; set; }
 
         public string LinkAudio { get; set; }
 

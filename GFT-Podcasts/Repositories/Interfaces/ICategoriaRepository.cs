@@ -11,6 +11,7 @@ namespace GFT_Podcasts.Repositories.Interfaces {
         void Editar(Categoria obj);
 
         void Criar(Categoria obj);
+        bool Existe(int id);
         IEnumerable<CategoriaListagemViewModel> Listar();
     }
 }

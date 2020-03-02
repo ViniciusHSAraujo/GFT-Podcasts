@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using GFT_Podcasts.Libraries.ExtensionsMethods;
 using GFT_Podcasts.Models;
 using GFT_Podcasts.Models.ViewModels;
@@ -9,7 +6,8 @@ using GFT_Podcasts.Models.ViewModels.EpisodioViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GFT_Podcasts.Controllers {
+namespace GFT_Podcasts.Controllers
+{
     [Route("api/")]
     public class EpisodioController : Controller {
         private readonly IEpisodioRepository _episodioRepository;
@@ -27,22 +25,11 @@ namespace GFT_Podcasts.Controllers {
 
             if (episodio == null) {
                 return new ObjectResult(new ResultViewModel
-                    (false, "Podcast não encontrado!", null));
+                    (false, "Episódio não encontrado!", null));
             }
 
             return new ObjectResult(new ResultViewModel
                 (true, "Episódio encontrado com sucesso!", episodio));
-        }
-
-        [HttpGet]
-        [Route("v1/episodios")]
-        public ObjectResult Get() {
-            var episodios = _episodioRepository.Listar();
-            return !episodios.Any()
-                ? new ObjectResult
-                    (new ResultViewModel(false, "Nenhum episódio encontrado", episodios))
-                : new ObjectResult
-                    (new ResultViewModel(true, "Listagem de Episódios!", episodios));
         }
 
         [HttpPost]
@@ -65,6 +52,7 @@ namespace GFT_Podcasts.Controllers {
                 LinkAudio = episodioTemp.LinkAudio
             };
 
+            Response.StatusCode = 404;
 
             _episodioRepository.Criar(episodio);
             return new ObjectResult(
@@ -103,6 +91,9 @@ namespace GFT_Podcasts.Controllers {
         [Route("v1/episodios/{id}")]
         public ObjectResult Delete(int id) {
             var episodio = _episodioRepository.Buscar(id);
+            if (episodio == null) {
+                return new ObjectResult(new ResultViewModel(false, "Episódio inexistente.", null));
+            }
             _episodioRepository.Remover(episodio);
             return new ObjectResult(
                 new ResultViewModel(true, "Episódio excluido com sucesso!", episodio));

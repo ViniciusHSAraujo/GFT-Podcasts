@@ -16,10 +16,11 @@ namespace GFT_Podcasts.Models.ViewModels.EpisodioViewModels {
         public string Descricao { get; set; }
         
         [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
+        [DataType(DataType.Date)]
         public DateTime Lancamento { get; set; }
         
         [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
-        public double Duracao { get; set; }
+        public int Duracao { get; set; }
         
         [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
         [MinLength(3, ErrorMessage = " O campo {0} deve ter no mínimo {1} caracteres")]

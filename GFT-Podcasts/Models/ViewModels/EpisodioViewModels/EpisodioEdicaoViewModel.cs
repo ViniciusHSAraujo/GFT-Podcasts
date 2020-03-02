@@ -21,7 +21,7 @@ namespace GFT_Podcasts.Models.ViewModels.EpisodioViewModels {
         public DateTime Lancamento { get; set; }
 
         [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]
-        public double Duracao { get; set; }
+        public int Duracao { get; set; }
 
 
         [Required(ErrorMessage = "O campo {0} é de preenchimento obrigatório.")]

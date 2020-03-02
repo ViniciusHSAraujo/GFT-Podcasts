@@ -33,7 +33,11 @@ namespace GFT_Podcasts.Controllers {
         [Route("v1/categorias")]
         public ObjectResult Get() {
             var categorias = _categoriaRepository.Listar();
-            return new ObjectResult(new ResultViewModel(true, "Listagem de Categorias!", categorias));
+            return !categorias.Any()
+                ? new ObjectResult
+                    (new ResultViewModel(false, "Nenhuma categoria encontrada.", categorias))
+                : new ObjectResult
+                    (new ResultViewModel(true, "Listagem de Categorias!", categorias));
         }
 
         [HttpPost]
@@ -57,6 +61,9 @@ namespace GFT_Podcasts.Controllers {
                 ModelState.AddModelError("Id", "Id da requisição difere do Id da categoria.");
             }
             
+            if (!_categoriaRepository.Existe(categoriaTemp.Id)) {
+                ModelState.AddModelError("CategoriaId", "Categoria inexistente.");
+            }
             if (!ModelState.IsValid)
                 return new ObjectResult(new ResultViewModel(false, "Erro ao editar categoria.",
                     ModelState.ListarErros()));
@@ -72,6 +79,9 @@ namespace GFT_Podcasts.Controllers {
         [Route("v1/categorias/{id}")]
         public ObjectResult Delete(int id) {
             var categoria = _categoriaRepository.Buscar(id);
+            if (categoria == null) {
+                return new ObjectResult(new ResultViewModel(false, "Categoria inexistente.", null));
+            }
             _categoriaRepository.Remover(categoria);
             return new ObjectResult(new ResultViewModel(true, "Categoria excluída com sucesso!", categoria));
         }
