@@ -20,7 +20,25 @@ namespace GFT_Podcasts.Controllers
             _episodioRepository = episodioRepository;
             _podcastRepository = podcastRepository;
         }
-
+        
+        /// <summary>
+        /// Creates a TodoItem.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     Get /Todo
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Item1",
+        ///        "isComplete": true
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="item"></param>
+        /// <returns>A newly created TodoItem</returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the item is null</response>  
         [HttpGet]
         [Route("v1/episodios/{id}")]
         public ObjectResult Get(int id) {
@@ -35,6 +53,10 @@ namespace GFT_Podcasts.Controllers
             return ResponseUtils.GenerateObjectResult("Episódio encontrado com sucesso!", episodio);
         }
 
+        /// <summary>
+        /// Adiciona um episódio
+        /// </summary>
+        /// <param name="id">Id do episódio</param>   
         [HttpPost]
         [Route("v1/episodios/")]
         public ObjectResult Post([FromBody] EpisodioCadastroViewModel episodioTemp) {
@@ -61,6 +83,10 @@ namespace GFT_Podcasts.Controllers
             return ResponseUtils.GenerateObjectResult("Episódio cadastrado com sucesso!", episodio);
         }
 
+        /// <summary>
+        /// Edita um episódio através do id
+        /// </summary>
+        /// <param name="id">Id do episódio</param>   
         [HttpPut]
         [Route("v1/episodios/{id}")]
         public ObjectResult Put(int id, [FromBody] EpisodioEdicaoViewModel episodioTemp) {
@@ -93,6 +119,10 @@ namespace GFT_Podcasts.Controllers
             return ResponseUtils.GenerateObjectResult( "Episódio editado com sucesso!", episodio);
         }
 
+        /// <summary>
+        /// Deleta um episódio através do id 
+        /// </summary>
+        /// <param name="id">Id do episódio</param>   
         [HttpDelete]
         [Route("v1/episodios/{id}")]
         public ObjectResult Delete(int id) {
@@ -114,8 +144,6 @@ namespace GFT_Podcasts.Controllers
                 Response.StatusCode = StatusCodes.Status406NotAcceptable;
                 return ResponseUtils.GenerateObjectResult("Não foi possível excluir o episódio, contate o suporte!", episodio);
             }
-
-            
         }
     }
 }
