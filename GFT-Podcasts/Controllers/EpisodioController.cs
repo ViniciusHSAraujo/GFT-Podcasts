@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using GFT_Podcasts.Libraries.ExtensionsMethods;
+using GFT_Podcasts.Libraries.Utils;
 using GFT_Podcasts.Models;
 using GFT_Podcasts.Models.ViewModels;
 using GFT_Podcasts.Models.ViewModels.EpisodioViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GFT_Podcasts.Controllers
@@ -24,12 +27,12 @@ namespace GFT_Podcasts.Controllers
             var episodio = _episodioRepository.Buscar(id);
 
             if (episodio == null) {
-                return new ObjectResult(new ResultViewModel
-                    (false, "Episódio não encontrado!", null));
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Episódio não encontrado!", null);
             }
 
-            return new ObjectResult(new ResultViewModel
-                (true, "Episódio encontrado com sucesso!", episodio));
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Episódio encontrado com sucesso!", episodio);
         }
 
         [HttpPost]
@@ -39,9 +42,10 @@ namespace GFT_Podcasts.Controllers
                 ModelState.AddModelError("PodcastId", "Podcast inexistente.");
             }
 
-            if (!ModelState.IsValid)
-                return new ObjectResult(
-                    new ResultViewModel(false, "Erro ao cadastrar o episódio", ModelState.ListarErros()));
+            if (!ModelState.IsValid){
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao cadastrar o episódio", ModelState.ListarErros());
+            }
             var episodio = new Episodio() {
                 Id = 0,
                 Descricao = episodioTemp.Descricao,
@@ -52,11 +56,9 @@ namespace GFT_Podcasts.Controllers
                 LinkAudio = episodioTemp.LinkAudio
             };
 
-            Response.StatusCode = 404;
-
+            Response.StatusCode = StatusCodes.Status200OK;
             _episodioRepository.Criar(episodio);
-            return new ObjectResult(
-                new ResultViewModel(true, "Episódio cadastrado com sucesso!", episodio));
+            return ResponseUtils.GenerateObjectResult("Episódio cadastrado com sucesso!", episodio);
         }
 
         [HttpPut]
@@ -65,14 +67,17 @@ namespace GFT_Podcasts.Controllers
             if (id != episodioTemp.Id) {
                 ModelState.AddModelError("Id", "Id da requisição difere do Id do episódio.");
             }
-
+            if (!_podcastRepository.Existe(episodioTemp.Id)) {
+                ModelState.AddModelError("Id", "Episódio inexistente.");
+            }
             if (!_podcastRepository.Existe(episodioTemp.PodcastId)) {
                 ModelState.AddModelError("PodcastId", "Podcast inexistente.");
             }
+            if (!ModelState.IsValid){
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao editar o episódio", ModelState.ListarErros());
+            }
 
-            if (!ModelState.IsValid)
-                return new ObjectResult(
-                    new ResultViewModel(false, "Erro ao editar o episódio", ModelState.ListarErros()));
             var episodio = new Episodio() {
                 Id = episodioTemp.Id,
                 Descricao = episodioTemp.Descricao,
@@ -82,21 +87,35 @@ namespace GFT_Podcasts.Controllers
                 Titulo = episodioTemp.Titulo,
                 LinkAudio = episodioTemp.LinkAudio
             };
+            
+            Response.StatusCode = StatusCodes.Status200OK;
             _episodioRepository.Editar(episodio);
-            return new ObjectResult(
-                new ResultViewModel(true, "Episódio editado com sucesso!", episodio));
+            return ResponseUtils.GenerateObjectResult( "Episódio editado com sucesso!", episodio);
         }
 
         [HttpDelete]
         [Route("v1/episodios/{id}")]
         public ObjectResult Delete(int id) {
             var episodio = _episodioRepository.Buscar(id);
+
             if (episodio == null) {
-                return new ObjectResult(new ResultViewModel(false, "Episódio inexistente.", null));
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Episódio inexistente.", null);
             }
-            _episodioRepository.Remover(episodio);
-            return new ObjectResult(
-                new ResultViewModel(true, "Episódio excluido com sucesso!", episodio));
+
+            try
+            {
+                Response.StatusCode = StatusCodes.Status200OK;
+                _episodioRepository.Remover(episodio);
+                return ResponseUtils.GenerateObjectResult("Episódio excluido com sucesso!", episodio);
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                return ResponseUtils.GenerateObjectResult("Não foi possível excluir o episódio, contate o suporte!", episodio);
+            }
+
+            
         }
     }
 }

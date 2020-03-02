@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace GFT_Podcasts.Models.ViewModels.PodcastViewModels {
-    public class PodcastSimplificadoViewModel {
+    public class PodcastDetalhadoViewModel {
         public int Id { get; set; }
 
         public string Nome { get; set; }
@@ -13,5 +13,7 @@ namespace GFT_Podcasts.Models.ViewModels.PodcastViewModels {
         public string Link { get; set; }
 
         public string Imagem { get; set; }
+
+        public IEnumerable<Episodio> Episodios { get; set; }
     }
 }

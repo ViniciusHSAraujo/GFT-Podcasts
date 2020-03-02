@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using GFT_Podcasts.Libraries.ExtensionsMethods;
+using GFT_Podcasts.Libraries.Utils;
 using GFT_Podcasts.Models;
-using GFT_Podcasts.Models.ViewModels;
 using GFT_Podcasts.Models.ViewModels.CategoriaViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GFT_Podcasts.Controllers {
+namespace GFT_Podcasts.Controllers
+{
     [Route("api/")]
     public class CategoriaController : ControllerBase {
         private readonly ICategoriaRepository _categoriaRepository;
@@ -23,35 +24,40 @@ namespace GFT_Podcasts.Controllers {
             var categoria = _categoriaRepository.Buscar(id);
 
             if (categoria == null) {
-                return new ObjectResult(new ResultViewModel(false, "Categoria não encontrada!", null));
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Categoria não encontrada!");
             }
-
-            return new ObjectResult(new ResultViewModel(true, "Categoria encontrada!", categoria));
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Categoria encontrada!", categoria);
         }
-
         [HttpGet]
         [Route("v1/categorias")]
         public ObjectResult Get() {
             var categorias = _categoriaRepository.Listar();
-            return !categorias.Any()
-                ? new ObjectResult
-                    (new ResultViewModel(false, "Nenhuma categoria encontrada.", categorias))
-                : new ObjectResult
-                    (new ResultViewModel(true, "Listagem de Categorias!", categorias));
+
+            if(!categorias.Any()){
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Nenhuma categoria encontrada.", categorias);
+            }
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Listagem de Categorias!", categorias);
         }
 
         [HttpPost]
         [Route("v1/categorias/")]
         public ObjectResult Post([FromBody] CategoriaCadastroViewModel categoriaTemp) {
-            if (!ModelState.IsValid)
-                return new ObjectResult(new ResultViewModel(false, "Erro ao cadastrar categoria.",
-                    ModelState.ListarErros()));
+            if (!ModelState.IsValid) {
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao cadastrar categoria.",
+                    ModelState.ListarErros());
+            }
             var categoria = new Categoria() {
                 Id = 0,
                 Nome = categoriaTemp.Nome
             };
             _categoriaRepository.Criar(categoria);
-            return new ObjectResult(new ResultViewModel(true, "Categoria cadastrada com sucesso!", categoria));
+            Response.StatusCode = StatusCodes.Status201Created;
+            return ResponseUtils.GenerateObjectResult("Categoria cadastrada com sucesso!", categoria);
         }
 
         [HttpPut]
@@ -64,15 +70,18 @@ namespace GFT_Podcasts.Controllers {
             if (!_categoriaRepository.Existe(categoriaTemp.Id)) {
                 ModelState.AddModelError("CategoriaId", "Categoria inexistente.");
             }
-            if (!ModelState.IsValid)
-                return new ObjectResult(new ResultViewModel(false, "Erro ao editar categoria.",
-                    ModelState.ListarErros()));
+            if (!ModelState.IsValid) {
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao editar categoria.",
+                    ModelState.ListarErros());
+            }
             var categoria = new Categoria() {
                 Id = categoriaTemp.Id,
                 Nome = categoriaTemp.Nome
             };
             _categoriaRepository.Editar(categoria);
-            return new ObjectResult(new ResultViewModel(true, "Categoria editada com sucesso!", categoria));
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Categoria editada com sucesso!", categoria);
         }
 
         [HttpDelete]
@@ -80,10 +89,17 @@ namespace GFT_Podcasts.Controllers {
         public ObjectResult Delete(int id) {
             var categoria = _categoriaRepository.Buscar(id);
             if (categoria == null) {
-                return new ObjectResult(new ResultViewModel(false, "Categoria inexistente.", null));
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult( "Categoria inexistente.", null);
             }
-            _categoriaRepository.Remover(categoria);
-            return new ObjectResult(new ResultViewModel(true, "Categoria excluída com sucesso!", categoria));
+            try {
+                _categoriaRepository.Remover(categoria);
+                Response.StatusCode = StatusCodes.Status200OK;
+                return ResponseUtils.GenerateObjectResult("Categoria excluída com sucesso!", categoria);
+            } catch (Exception) {
+                Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                return ResponseUtils.GenerateObjectResult("Não foi possível excluir a categoria, contate o suporte!", categoria);
+            }
         }
     }
 }

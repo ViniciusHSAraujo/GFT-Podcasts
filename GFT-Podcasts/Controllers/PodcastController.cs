@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using GFT_Podcasts.Libraries.ExtensionsMethods;
+using GFT_Podcasts.Libraries.Utils;
 using GFT_Podcasts.Models;
-using GFT_Podcasts.Models.ViewModels;
 using GFT_Podcasts.Models.ViewModels.PodcastViewModels;
 using GFT_Podcasts.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GFT_Podcasts.Controllers
@@ -26,30 +28,35 @@ namespace GFT_Podcasts.Controllers
             var podcast = _podcastRepository.Buscar(id);
             
             if (podcast == null) {
-                return new ObjectResult(new ResultViewModel(false, "Podcast não encontrado!", null));
+                return ResponseUtils.GenerateObjectResult("Podcast não encontrado!", null);
             }
             
-            var podcastSimplificado = new PodcastSimplificadoViewModel() {
+            var podcastSimplificado = new PodcastDetalhadoViewModel() {
                 Id = podcast.Id,
                 Nome = podcast.Nome,
                 Autor = podcast.Autor,
                 Descricao = podcast.Descricao,
                 Link = podcast.Link,
-                Imagem = podcast.Imagem
+                Imagem = podcast.Imagem,
+                Episodios = podcast.Episodios
             };
             
-            return new ObjectResult(new ResultViewModel(true, "Podcast encontrado com sucesso!", podcastSimplificado));
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Podcast encontrado com sucesso!", podcastSimplificado);
         }
 
         [HttpGet]
         [Route("v1/podcasts")]
         public ObjectResult Get() {
             var podcasts = _podcastRepository.Listar();
-            return !podcasts.Any()
-                ? new ObjectResult
-                    (new ResultViewModel(false, "Nenhum podcast encontrado.", podcasts))
-                : new ObjectResult
-                    (new ResultViewModel(true, "Listagem de Podcasts!", podcasts));
+
+            if(!podcasts.Any()){
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Nenhum podcast encontrado.", podcasts);
+            }
+
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Listagem de Podcasts!", podcasts);
         }
         
         [HttpPost]
@@ -59,8 +66,9 @@ namespace GFT_Podcasts.Controllers
                 ModelState.AddModelError("CategoriaId", "Categoria inexistente.");
             }
             if (!ModelState.IsValid) {
-                return new ObjectResult(new ResultViewModel(false, "Erro ao cadastrar podcast.",
-                    ModelState.ListarErros()));
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao cadastrar podcast.",
+                    ModelState.ListarErros());
             }
             var podcast = new Podcast() {
                 Id = 0,
@@ -72,8 +80,9 @@ namespace GFT_Podcasts.Controllers
                 CategoriaId = podcastTemp.CategoriaId
             };
             _podcastRepository.Criar(podcast);
-            return new ObjectResult(new ResultViewModel(true, "Podcast cadastrado com sucesso!", 
-                podcastTemp));
+            Response.StatusCode = StatusCodes.Status201Created;
+            return ResponseUtils.GenerateObjectResult("Podcast cadastrado com sucesso!", 
+                podcastTemp);
         }
         
         [HttpPut]
@@ -88,9 +97,11 @@ namespace GFT_Podcasts.Controllers
             if (!_categoriaRepository.Existe(podcastTemp.CategoriaId)) {
                 ModelState.AddModelError("CategoriaId", "Categoria inexistente.");
             }
-            if (!ModelState.IsValid)
-                return new ObjectResult(new ResultViewModel(false, "Erro ao editar categoria.",
-                    ModelState.ListarErros()));
+            if (!ModelState.IsValid) {
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return ResponseUtils.GenerateObjectResult("Erro ao editar categoria.",
+                    ModelState.ListarErros());
+            }
             var podcast = new Podcast() {
                 Id = podcastTemp.Id,
                 Nome = podcastTemp.Nome,
@@ -101,8 +112,9 @@ namespace GFT_Podcasts.Controllers
                 CategoriaId = podcastTemp.CategoriaId
             };
             _podcastRepository.Editar(podcast);
-            return new ObjectResult(new ResultViewModel(true, "Podcast editado com sucesso!", 
-                podcastTemp));
+            Response.StatusCode = StatusCodes.Status200OK;
+            return ResponseUtils.GenerateObjectResult("Podcast editado com sucesso!", 
+                podcastTemp);
         }
         
         [HttpDelete]
@@ -110,12 +122,17 @@ namespace GFT_Podcasts.Controllers
         public ObjectResult Delete(int id) {
             var podcast = _podcastRepository.Buscar(id);
             if (podcast == null) {
-                return new ObjectResult(new ResultViewModel(false, "Podcast inexistente.", null));
+                Response.StatusCode = StatusCodes.Status404NotFound;
+                return ResponseUtils.GenerateObjectResult("Podcast inexistente.", null);
             }
-            _podcastRepository.Remover(podcast);
-            return new ObjectResult(new ResultViewModel(true, "Podcast excluído com sucesso!", 
-                podcast));
-
+            try {
+                _podcastRepository.Remover(podcast);
+                Response.StatusCode = StatusCodes.Status200OK;
+                return ResponseUtils.GenerateObjectResult("Podcast excluído com sucesso!", podcast);
+            } catch (Exception) {
+                Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                return ResponseUtils.GenerateObjectResult("Não foi possível excluir o podcast, contate o suporte!", podcast);
+            }
         }
     }
 }    
